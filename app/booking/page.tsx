@@ -3,39 +3,46 @@
 import React, { useState, Suspense } from "react";
 import NavTabs from "@/components/animata/container/nav-tabs";
 import { format } from "date-fns";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 import {
-  Clock,
   CheckCircle,
   Calendar as CalendarIcon,
   Sparkles,
-  ShoppingBag,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import Modal from "@/components/animata/overlay/modal";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import SlideArrowButton from "@/components/animata/button/slide-arrow-button";
+import ServiceTabs from "@/components/animata/booking-flow/ServiceTabs";
+import BookingCalendar from "@/components/animata/booking-flow/BookingCalendar";
+import TimeSlots from "@/components/animata/booking-flow/TimeSlots";
+import CustomerDetailsForm from "@/components/animata/booking-flow/CustomerDetailsForm";
 
 function BookingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Booking State
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-
+  const [selectedCategory, setSelectedCategory] = useState("Bridal & Grooming");
   const [selectedService, setSelectedService] = useState(() => {
-    const product = searchParams.get("product");
-    if (product) return `Pickup: ${product}`;
-    return searchParams.get("service") || "Bridal Consultation";
+    return searchParams.get("service") || "";
   });
 
-  const [productContext, setProductContext] = useState(() =>
-    searchParams.get("product")
-  );
+  // User Details State
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    phone: "",
+    paymentMethod: "cod",
+  });
 
-  // Expanded Service List
-  const serviceCategories = {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Data
+  const serviceCategories: Record<string, string[]> = {
     "Bridal & Grooming": [
       "Royal Bridal",
       "Silver Bride",
@@ -57,11 +64,6 @@ function BookingContent() {
       "Rebonding",
     ],
   };
-
-  const allServices = Object.values(serviceCategories).flat();
-
-  // Modal State
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const generateSlots = () => {
     const slots = [];
@@ -86,259 +88,210 @@ function BookingContent() {
     setShowConfirmation(true);
   };
 
-  const css = `
-    .rdp {
-      --rdp-cell-size: 40px;
-      --rdp-accent-color: #e11d48; 
-      --rdp-background-color: #ffe4e6; 
-      margin: 0;
-    }
-    .rdp-day_selected:not([disabled]) { 
-      background-color: var(--rdp-accent-color);
-      font-weight: bold;
-    }
-    .rdp-day_selected:hover:not([disabled]) { 
-      background-color: #be123c; 
-    }
-    .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
-        background-color: #fff1f2; 
-    }
-  `;
+  const isFormValid =
+    selectedService &&
+    selectedDate &&
+    selectedSlot &&
+    userDetails.name.trim().length >= 3 &&
+    userDetails.phone.trim().length >= 10;
 
   return (
-    <>
-      <style>{css}</style>
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-rose-900 mb-3">
-              Book Your Experience
-            </h1>
-            <p className="text-neutral-500 text-lg">
-              Reserve your exclusive session at Sargodha&apos;s premier studio.
-            </p>
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-10"
+        >
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-rose-900 mb-3">
+            Book Your Experience
+          </h1>
+          <p className="text-neutral-500 text-lg flex items-center justify-center gap-2">
+            <MapPin size={18} className="text-rose-500" />
+            Sargodha&apos;s Premier Beauty Studio
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT COLUMN: Service & Calendar (5 cols) */}
+          <div className="lg:col-span-5 space-y-8">
+            {/* Service Selection */}
+            <section className="bg-white p-6 rounded-3xl shadow-sm border border-rose-100">
+              <h3 className="text-lg font-bold text-rose-900 mb-4 flex items-center gap-3">
+                <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                  1
+                </div>
+                Choose Service
+              </h3>
+
+              <ServiceTabs
+                categories={Object.keys(serviceCategories)}
+                selectedCategory={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+
+              <div className="flex flex-wrap gap-2 animate-in fade-in duration-300">
+                {serviceCategories[selectedCategory].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedService(s)}
+                    className={cn(
+                      "px-3 py-2 rounded-lg text-sm font-medium border transition-all duration-200 text-left",
+                      selectedService === s
+                        ? "border-amber-500 bg-amber-50 text-amber-900 shadow-sm ring-1 ring-amber-200"
+                        : "border-gray-200 hover:border-amber-300 text-gray-600 bg-gray-50/50"
+                    )}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Calendar */}
+            <section className="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 flex flex-col items-center">
+              <h3 className="text-lg font-bold text-rose-900 mb-4 flex items-center gap-3 w-full">
+                <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                  2
+                </div>
+                Select Date
+              </h3>
+              <BookingCalendar
+                selectedDate={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setSelectedSlot(null);
+                }}
+              />
+            </section>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            {/* LEFT COLUMN: Service & Calendar */}
-            <div className="w-full lg:w-5/12 space-y-8">
-              {/* 1. Service Selection */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-rose-100">
-                <h3 className="text-lg font-bold text-rose-900 mb-4 flex items-center gap-3">
-                  <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
-                    1
-                  </div>
-                  Choose Service
-                </h3>
-
-                {productContext && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3 text-amber-800">
-                    <ShoppingBag size={20} />
-                    <span className="text-sm font-medium">
-                      Booking pickup for: <strong>{productContext}</strong>
-                    </span>
-                    <button
-                      onClick={() => {
-                        setProductContext(null);
-                        setSelectedService("Bridal Consultation");
-                      }}
-                      className="ml-auto text-xs underline"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {Object.entries(serviceCategories).map(
-                    ([category, items]) => (
-                      <div key={category}>
-                        <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">
-                          {category}
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {items.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => {
-                                setSelectedService(s);
-                                setProductContext(null);
-                              }}
-                              className={cn(
-                                "px-3 py-2 rounded-lg text-xs font-medium border transition-all duration-200",
-                                selectedService === s
-                                  ? "border-amber-500 bg-amber-50 text-amber-900 shadow-sm ring-1 ring-amber-200"
-                                  : "border-gray-200 hover:border-amber-300 text-gray-600 bg-gray-50/50"
-                              )}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  )}
+          {/* RIGHT COLUMN: Time & Details (7 cols) */}
+          <div className="lg:col-span-7 space-y-8">
+            {/* Time Slots */}
+            <section
+              className={cn(
+                "bg-white p-8 rounded-3xl shadow-sm border border-rose-100 transition-all duration-300",
+                !selectedDate
+                  ? "opacity-60 grayscale-[0.5] pointer-events-none"
+                  : "opacity-100"
+              )}
+            >
+              <h3 className="text-lg font-bold text-rose-900 mb-6 flex items-center gap-3">
+                <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                  3
                 </div>
+                Select Time Slot
+              </h3>
 
-                {/* Show selected Custom/Product service if it's not in the list */}
-                {!allServices.includes(selectedService) && (
-                  <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-                    <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">
-                      Selected
-                    </h4>
-                    <button className="px-4 py-2 rounded-lg text-sm font-medium border border-amber-500 bg-amber-50 text-amber-900 shadow-sm ring-1 ring-amber-200">
-                      {selectedService}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Calendar Selection */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 flex flex-col items-center">
-                <h3 className="text-lg font-bold text-rose-900 mb-6 flex items-center gap-3 w-full">
-                  <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
-                    2
-                  </div>
-                  Select Date
-                </h3>
-                <div className="border border-rose-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-10px_rgba(225,29,72,0.1)]">
-                  <DayPicker
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setSelectedSlot(null);
-                    }}
-                    disabled={[{ before: new Date() }]}
-                  />
+              {!selectedDate ? (
+                <div className="py-12 flex flex-col items-center justify-center text-neutral-400 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
+                  <CalendarIcon size={40} className="mb-3 opacity-20" />
+                  <p>Select a date to view available times</p>
                 </div>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: Slots & Summary */}
-            <div className="w-full lg:w-7/12 space-y-8">
-              {/* 3. Slot Selection */}
-              <div
-                className={cn(
-                  "bg-white p-8 rounded-3xl shadow-sm border border-rose-100 transition-all duration-500",
-                  !selectedDate
-                    ? "opacity-60 pointer-events-none grayscale-[0.5]"
-                    : "opacity-100"
-                )}
-              >
-                <h3 className="text-lg font-bold text-rose-900 mb-6 flex items-center gap-3">
-                  <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
-                    3
-                  </div>
-                  Select Time Slot
-                </h3>
-
-                {!selectedDate ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-neutral-400 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
-                    <CalendarIcon size={40} className="mb-3 opacity-20" />
-                    <p>Please select a date from the calendar first.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {availableSlots.map((slot) => (
-                      <button
-                        key={slot}
-                        onClick={() => setSelectedSlot(slot)}
-                        className={cn(
-                          "group relative flex items-center p-4 rounded-xl border-2 transition-all duration-200",
-                          selectedSlot === slot
-                            ? "border-rose-600 bg-rose-600 text-white shadow-lg scale-[1.02]"
-                            : "border-gray-100 bg-white hover:border-rose-200 hover:shadow-md"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "p-2 rounded-full mr-3 transition-colors",
-                            selectedSlot === slot
-                              ? "bg-white/20 text-white"
-                              : "bg-rose-50 text-rose-500 group-hover:bg-rose-100"
-                          )}
-                        >
-                          <Clock size={18} />
-                        </div>
-                        <span className="font-semibold text-lg">{slot}</span>
-                        {selectedSlot === slot && (
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            <CheckCircle size={20} className="text-white" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Button */}
-              <button
-                onClick={handleConfirm}
-                disabled={!selectedDate || !selectedSlot}
-                className="w-full bg-rose-900 hover:bg-rose-950 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white text-lg font-bold py-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-3 ring-4 ring-transparent hover:ring-rose-200"
-              >
-                <span>Confirm Appointment</span>
-                <Sparkles
-                  className={cn(
-                    "w-5 h-5",
-                    !selectedDate || !selectedSlot ? "hidden" : "block"
-                  )}
+              ) : (
+                <TimeSlots
+                  slots={availableSlots}
+                  selectedSlot={selectedSlot}
+                  onSelect={setSelectedSlot}
                 />
-              </button>
-            </div>
+              )}
+            </section>
+
+            {/* Customer Details */}
+            <AnimatePresence>
+              {selectedSlot && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white p-8 rounded-3xl shadow-sm border border-rose-100"
+                >
+                  <h3 className="text-lg font-bold text-rose-900 mb-6 flex items-center gap-3">
+                    <div className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                      4
+                    </div>
+                    Confirm Details
+                  </h3>
+
+                  <CustomerDetailsForm
+                    name={userDetails.name}
+                    phone={userDetails.phone}
+                    paymentMethod={userDetails.paymentMethod}
+                    onChange={(field, value) =>
+                      setUserDetails((prev) => ({ ...prev, [field]: value }))
+                    }
+                  />
+
+                  <div className="mt-8 pt-6 border-t border-gray-100">
+                    <button
+                      onClick={handleConfirm}
+                      disabled={!isFormValid}
+                      className="w-full bg-rose-900 hover:bg-rose-950 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      Confirm Appointment
+                      {isFormValid && <Sparkles size={18} />}
+                    </button>
+                    {!isFormValid && (
+                      <p className="text-center text-sm text-rose-500 mt-3 font-medium animate-pulse">
+                        * Please complete all fields (Name must be 3+
+                        characters, Phone 10+ digits)
+                      </p>
+                    )}
+                  </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Confirmation Modal */}
+        {/* Success Modal */}
         <Modal
           isOpen={showConfirmation}
           onClose={() => setShowConfirmation(false)}
         >
-          <div className="p-8 text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <div className="p-8 text-center max-w-sm mx-auto">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-3xl font-serif font-bold text-rose-900 mb-2">
-              Booking Confirmed!
+              Confirmed!
             </h2>
             <p className="text-neutral-500 mb-8">
-              We can&apos;t wait to see you.
+              Thank you, {userDetails.name}.
             </p>
 
-            <div className="bg-neutral-50 rounded-xl p-6 mb-8 text-left space-y-3 border border-neutral-100">
+            <div className="bg-neutral-50 rounded-xl p-4 mb-8 text-left space-y-2 border border-neutral-100 text-sm">
               <div className="flex justify-between">
-                <span className="text-neutral-500">Service</span>
+                <span className="text-neutral-500">Service</span>{" "}
                 <span className="font-bold text-rose-900">
                   {selectedService}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Date</span>
+                <span className="text-neutral-500">Date</span>{" "}
                 <span className="font-bold text-rose-900">
-                  {selectedDate && format(selectedDate, "MMM do, yyyy")}
+                  {selectedDate && format(selectedDate, "MMM do")}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Time</span>
+                <span className="text-neutral-500">Time</span>{" "}
                 <span className="font-bold text-rose-900">{selectedSlot}</span>
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                setShowConfirmation(false);
-                router.push("/");
-              }}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-colors"
-            >
-              Done
-            </button>
+            <div className="flex justify-center">
+              <SlideArrowButton
+                text="Return Home"
+                primaryColor="#e11d48"
+                onClick={() => router.push("/")}
+                className="border-rose-100"
+              />
+            </div>
           </div>
         </Modal>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -358,8 +311,8 @@ export default function BookingPage() {
       </div>
       <Suspense
         fallback={
-          <div className="p-12 text-center text-rose-900">
-            Loading booking experience...
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
           </div>
         }
       >
