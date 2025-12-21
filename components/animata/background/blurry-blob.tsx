@@ -10,20 +10,20 @@ export default function BlurryBlob({
   secondBlobColor,
 }: BlobProps) {
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 pointer-events-none">
       <div className="relative w-full max-w-lg">
         <div
           className={cn(
             "absolute -right-24 -top-28 h-72 w-72 animate-pop-blob rounded-sm bg-blue-400 p-8 opacity-45 mix-blend-multiply blur-3xl filter",
             className,
-            firstBlobColor,
+            firstBlobColor
           )}
         ></div>
         <div
           className={cn(
             "absolute -left-40 -top-64 h-72 w-72 animate-pop-blob rounded-sm bg-purple-400 p-8 opacity-45 mix-blend-multiply blur-3xl filter",
             className,
-            secondBlobColor,
+            secondBlobColor
           )}
         ></div>
       </div>
