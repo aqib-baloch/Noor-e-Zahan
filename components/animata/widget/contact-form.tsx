@@ -12,7 +12,7 @@ export default function ContactForm() {
          <div className="space-y-4">
              <div className="flex items-center gap-3 text-rose-200">
                  <Phone size={18} />
-                 <span>+92 300 1234567</span>
+                 <span>+92 337 0683966</span>
              </div>
              <div className="flex items-center gap-3 text-rose-200">
                  <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>

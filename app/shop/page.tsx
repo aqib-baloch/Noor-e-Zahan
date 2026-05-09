@@ -103,7 +103,7 @@ function ShopContent() {
 
   const handleBuy = (product: (typeof products)[0]) => {
     const message = `Hi Noor-e-Zahan, I would like to order *${product.title}* (Price: ${product.price}). Please let me know the availability.`;
-    const whatsappUrl = `https://wa.me/923001234567?text=${encodeURIComponent(
+    const whatsappUrl = `https://wa.me/923370683966?text=${encodeURIComponent(
       message
     )}`;
     window.open(whatsappUrl, "_blank");
@@ -111,9 +111,7 @@ function ShopContent() {
 
   return (
     <div className="min-h-screen bg-neutral-50 font-sans text-neutral-800">
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
-        <NavTabs tabs={tabs} />
-      </div>
+      <NavTabs tabs={tabs} />
 
       <div className="container mx-auto px-4 py-16">
         <h1 className="text-4xl md:text-5xl font-serif font-bold text-center text-rose-900 mb-4">

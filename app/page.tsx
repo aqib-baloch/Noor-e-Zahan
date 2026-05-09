@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import NavTabs from "@/components/animata/container/nav-tabs";
 import ImageCarousel from "@/components/animata/carousel/image-carousel";
-import CardSpread from "@/components/animata/card/card-spread";
 import CommentReplyCard from "@/components/animata/card/comment-reply-card";
 import FlipCard from "@/components/animata/card/flip-card";
 import Marquee from "@/components/animata/container/marquee";
@@ -19,6 +18,10 @@ import {
   MapPin,
   Phone,
   Mail,
+  ArrowRight,
+  Camera,
+  Sparkles,
+  WandSparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -41,10 +44,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-neutral-50 font-sans text-neutral-800">
-      {/* Navigation */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
-        <NavTabs tabs={tabs} />
-      </div>
+      <NavTabs tabs={tabs} />
 
       {/* Hero Section */}
       <div className="relative w-full overflow-hidden bg-rose-950 text-white">
@@ -85,18 +85,39 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="bg-white py-20 px-4">
+      <div className="bg-white px-4 py-20">
         <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-center mb-4 text-rose-900">
-            Our Masterpieces
-          </h2>
-          <p className="text-center text-neutral-500 mb-16 max-w-2xl mx-auto text-lg">
-            Witness the transformation. Our gallery showcases the pinnacle of
-            bridal and party artistry.
-          </p>
+          <div className="mb-14 flex flex-col gap-6 text-center">
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-4 py-2 text-xs uppercase tracking-[0.28em] text-rose-500">
+              <Camera size={14} />
+              Curated Gallery
+            </div>
+            <h2 className="text-4xl font-serif font-bold text-rose-900 md:text-5xl">
+              Our Masterpieces
+            </h2>
+            <p className="mx-auto max-w-3xl text-lg text-neutral-500">
+              Witness the transformation through bridal beauty, mehndi detail,
+              skin rituals, and studio ambience. This section now introduces the
+              visual story instead of showing an unrelated card interaction.
+            </p>
+          </div>
 
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-16">
-            <div className="w-full max-w-md">
+          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[2rem] border border-rose-100 bg-gradient-to-br from-rose-950 via-rose-900 to-[#2e0717] p-6 text-white shadow-[0_24px_70px_rgba(120,22,58,0.18)] md:p-8">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.26em] text-amber-300">
+                    Featured Visuals
+                  </p>
+                  <h3 className="mt-2 text-3xl font-serif font-semibold">
+                    Looks worth pausing on
+                  </h3>
+                </div>
+                <div className="hidden h-14 w-14 items-center justify-center rounded-full bg-white/10 md:flex">
+                  <Sparkles size={20} className="text-amber-300" />
+                </div>
+              </div>
+
               <ImageCarousel
                 items={[
                   { id: 1, image: bridalImage, title: "Signature Bridal" },
@@ -105,10 +126,82 @@ export default function Home() {
                   { id: 4, image: interiorImage, title: "Luxury Ambience" },
                 ]}
               />
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+                  <p className="text-2xl font-semibold text-amber-300">Bridal</p>
+                  <p className="mt-1 text-sm text-rose-100/75">
+                    refined complexion, eyes, draping
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+                  <p className="text-2xl font-semibold text-amber-300">Skin</p>
+                  <p className="mt-1 text-sm text-rose-100/75">
+                    glow-focused prep before the event
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+                  <p className="text-2xl font-semibold text-amber-300">Salon</p>
+                  <p className="mt-1 text-sm text-rose-100/75">
+                    luxury ambience around the service
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 w-full max-w-2xl">
-              <CardSpread />
+            <div className="grid gap-6">
+              {[
+                {
+                  icon: WandSparkles,
+                  title: "Bridal looks with structure",
+                  text: "Every image is chosen to show finish quality, balance, and the signature Noor-e-Zahan styling language.",
+                },
+                {
+                  icon: Camera,
+                  title: "More than makeup shots",
+                  text: "The gallery covers mehndi, skin care, jewellery finishing, and salon atmosphere so the brand feels complete.",
+                },
+                {
+                  icon: Sparkles,
+                  title: "Built for conversion",
+                  text: "The section should move visitors from inspiration to action, so the content now reads like a showcase with direction.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[2rem] border border-rose-100 bg-rose-50/45 p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-rose-900 shadow-sm">
+                    <item.icon size={20} />
+                  </div>
+                  <h3 className="text-2xl font-serif font-semibold text-rose-900">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-base leading-7 text-neutral-600">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+
+              <div className="rounded-[2rem] border border-amber-200 bg-gradient-to-r from-amber-50 via-rose-50 to-white p-6">
+                <p className="text-sm uppercase tracking-[0.26em] text-rose-500">
+                  Explore More
+                </p>
+                <h3 className="mt-2 text-3xl font-serif font-semibold text-rose-950">
+                  Open the full visual portfolio
+                </h3>
+                <p className="mt-3 max-w-xl text-base leading-7 text-neutral-600">
+                  Browse the revamped gallery page with featured visuals,
+                  category filters, and larger previews for each look.
+                </p>
+                <button
+                  onClick={() => router.push("/gallery")}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-rose-950 px-6 py-3 font-semibold text-white transition-colors hover:bg-rose-900"
+                >
+                  Visit Gallery
+                  <ArrowRight size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -289,11 +382,11 @@ export default function Home() {
             <ul className="space-y-3 text-rose-200/80 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-amber-500 mt-0.5 shrink-0" />
-                <span>100-A, University Road, Satellite Town, Sargodha</span>
+                <span>University Road, Satellite Town, Sargodha</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="text-amber-500 shrink-0" />
-                <span>+92 300 1234567</span>
+                <span>+92 337 0683966</span>
               </li>
             </ul>
           </div>

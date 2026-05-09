@@ -306,9 +306,7 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 font-sans text-neutral-800">
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
-        <NavTabs tabs={tabs} />
-      </div>
+      <NavTabs tabs={tabs} />
       <Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center">
